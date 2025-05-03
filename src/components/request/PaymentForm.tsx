@@ -53,6 +53,10 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
             <div>INDBOOIT</div>
             <div className="font-medium">Account Holder:</div>
             <div>Aamec Kovilvenni</div>
+            <div className="font-medium">Account No:</div>
+            <div>724536890435</div>
+            <div className="font-medium">Amount:</div>
+            <div>₹550</div>
           </div>
         </div>
 

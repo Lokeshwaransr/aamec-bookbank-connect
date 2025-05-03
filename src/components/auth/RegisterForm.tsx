@@ -13,12 +13,23 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const RegisterForm = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [registerNumber, setRegisterNumber] = useState("");
+  const [email, setEmail] = useState("");
+  const [year, setYear] = useState("");
+  const [annualIncome, setAnnualIncome] = useState("");
+  const [cgpa, setCgpa] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const { register } = useAuth();
@@ -33,10 +44,28 @@ const RegisterForm = () => {
       return;
     }
 
+    if (!email.includes('@')) {
+      setError("Please enter a valid email address");
+      return;
+    }
+
+    if (!year) {
+      setError("Please select your year");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const success = await register(username, password, registerNumber);
+      const success = await register(
+        username, 
+        password, 
+        registerNumber, 
+        email,
+        year,
+        annualIncome,
+        cgpa
+      );
       if (success) {
         navigate("/dashboard");
       }
@@ -72,6 +101,18 @@ const RegisterForm = () => {
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="Enter your email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="registerNumber">Register Number</Label>
             <Input
               id="registerNumber"
@@ -80,6 +121,53 @@ const RegisterForm = () => {
               onChange={(e) => setRegisterNumber(e.target.value)}
               required
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="year">Year</Label>
+            <Select 
+              value={year} 
+              onValueChange={setYear}
+              required
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select year" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">First Year</SelectItem>
+                <SelectItem value="2">Second Year</SelectItem>
+                <SelectItem value="3">Third Year</SelectItem>
+                <SelectItem value="4">Fourth Year</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="annualIncome">Annual Income</Label>
+              <Input
+                id="annualIncome"
+                type="number"
+                placeholder="Enter annual income"
+                value={annualIncome}
+                onChange={(e) => setAnnualIncome(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="cgpa">Current CGPA</Label>
+              <Input
+                id="cgpa"
+                type="number"
+                step="0.01"
+                min="0"
+                max="10"
+                placeholder="Enter CGPA"
+                value={cgpa}
+                onChange={(e) => setCgpa(e.target.value)}
+                required
+              />
+            </div>
           </div>
 
           <div className="space-y-2">

@@ -10,6 +10,10 @@ export interface User {
   username: string;
   role: UserRole;
   registerNumber?: string; // Only for students
+  email?: string;
+  year?: string;
+  annualIncome?: string;
+  cgpa?: string;
 }
 
 // Define the context interface
@@ -17,8 +21,18 @@ interface AuthContextType {
   currentUser: User | null;
   login: (username: string, password: string, registerNumber?: string) => Promise<boolean>;
   logout: () => void;
-  register: (username: string, password: string, registerNumber: string) => Promise<boolean>;
+  register: (
+    username: string, 
+    password: string, 
+    registerNumber: string,
+    email?: string,
+    year?: string,
+    annualIncome?: string,
+    cgpa?: string
+  ) => Promise<boolean>;
   isAuthenticated: boolean;
+  getAllStudents: () => any[];
+  getStudentByRegisterNumber: (regNo: string) => any | null;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -103,6 +117,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           username: student.username,
           role: "student",
           registerNumber: student.registerNumber,
+          email: student.email,
+          year: student.year,
+          annualIncome: student.annualIncome,
+          cgpa: student.cgpa,
         });
         toast({
           title: "Login Successful",
@@ -129,8 +147,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
+  // Get all students
+  const getAllStudents = () => {
+    const storedStudents = localStorage.getItem("aamecStudents");
+    return storedStudents ? JSON.parse(storedStudents) : [];
+  };
+
+  // Get student by register number
+  const getStudentByRegisterNumber = (regNo: string) => {
+    const students = getAllStudents();
+    return students.find((s: any) => s.registerNumber === regNo) || null;
+  };
+
   // Register function for students
-  const register = async (username: string, password: string, registerNumber: string): Promise<boolean> => {
+  const register = async (
+    username: string, 
+    password: string, 
+    registerNumber: string,
+    email?: string,
+    year?: string,
+    annualIncome?: string,
+    cgpa?: string
+  ): Promise<boolean> => {
     // In a real app, we would send this data to a server
     // For this demo, we'll store in localStorage
     const storedStudents = localStorage.getItem("aamecStudents");
@@ -151,6 +189,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       username,
       password,
       registerNumber,
+      email,
+      year,
+      annualIncome,
+      cgpa,
       role: "student" as UserRole,
     };
 
@@ -163,6 +205,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       username: newStudent.username,
       role: "student",
       registerNumber: newStudent.registerNumber,
+      email: newStudent.email,
+      year: newStudent.year,
+      annualIncome: newStudent.annualIncome,
+      cgpa: newStudent.cgpa,
     });
 
     toast({
@@ -173,7 +219,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, login, logout, register, isAuthenticated }}>
+    <AuthContext.Provider value={{ 
+      currentUser, 
+      login, 
+      logout, 
+      register, 
+      isAuthenticated,
+      getAllStudents,
+      getStudentByRegisterNumber
+    }}>
       {children}
     </AuthContext.Provider>
   );

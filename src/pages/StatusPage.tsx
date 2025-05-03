@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useBook } from "@/context/BookContext";
 import { useAuth } from "@/context/AuthContext";
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -11,17 +11,21 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, AlertCircle, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CheckCircle, AlertCircle, Clock, FileText } from "lucide-react";
+import PaymentReceipt from "@/components/request/PaymentReceipt";
 
 const StatusPage = () => {
   const { currentUser } = useAuth();
-  const { getUserRequests, getBook } = useBook();
+  const { getUserRequests, getBook, getRequestById } = useBook();
+  const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
 
   if (!currentUser) {
     return null;
   }
 
   const userRequests = getUserRequests(currentUser.id);
+  const selectedRequest = selectedRequestId ? getRequestById(selectedRequestId) : null;
 
   const getStatusMessage = (request: any) => {
     if (request.status === "rejected") {
@@ -54,6 +58,14 @@ const StatusPage = () => {
       return <CheckCircle className="text-green-600" size={38} />;
     }
     return null;
+  };
+
+  const handleShowReceipt = (requestId: string) => {
+    setSelectedRequestId(requestId);
+  };
+
+  const handleCloseReceipt = () => {
+    setSelectedRequestId(null);
   };
 
   return (
@@ -92,7 +104,7 @@ const StatusPage = () => {
                 <CardContent>
                   <div className="flex items-center space-x-4 py-2">
                     {getStatusIcon(request)}
-                    <div>
+                    <div className="flex-grow">
                       <p className="text-sm">{getStatusMessage(request)}</p>
                       {request.paymentDetails && (
                         <p className="text-xs text-muted-foreground mt-1">
@@ -100,6 +112,16 @@ const StatusPage = () => {
                         </p>
                       )}
                     </div>
+                    {request.paymentStatus === "approved" && (
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => handleShowReceipt(request.id)}
+                      >
+                        <FileText className="mr-1 h-4 w-4" />
+                        Receipt
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -107,6 +129,17 @@ const StatusPage = () => {
           })
         )}
       </div>
+      
+      {selectedRequest && currentUser && (
+        <PaymentReceipt 
+          request={selectedRequest}
+          studentInfo={{
+            username: currentUser.username,
+            registerNumber: currentUser.registerNumber
+          }}
+          onClose={handleCloseReceipt}
+        />
+      )}
     </DashboardLayout>
   );
 };

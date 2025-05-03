@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth, User } from "./AuthContext";
@@ -16,6 +15,11 @@ export interface Book {
 export type RequestStatus = "pending" | "approved" | "rejected";
 export type PaymentStatus = "pending" | "approved" | "rejected" | "not_required";
 
+export interface PaymentDetails {
+  transactionId: string;
+  paymentTime: string;
+}
+
 export interface BookRequest {
   id: string;
   bookId: string;
@@ -25,10 +29,7 @@ export interface BookRequest {
   requestDate: string;
   status: RequestStatus;
   paymentStatus: PaymentStatus;
-  paymentDetails?: {
-    transactionId: string;
-    paymentTime: string;
-  };
+  paymentDetails?: PaymentDetails;
 }
 
 // Interface for the context
@@ -45,6 +46,7 @@ interface BookContextType {
   rejectPayment: (requestId: string) => void;
   getUserRequests: (userId: string) => BookRequest[];
   getBook: (bookId: string) => Book | undefined;
+  getRequestById: (requestId: string) => BookRequest | undefined;
 }
 
 // Sample books data
@@ -256,6 +258,11 @@ export const BookProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
+  // Get a request by ID
+  const getRequestById = (requestId: string) => {
+    return requests.find(request => request.id === requestId);
+  };
+
   // Submit payment details for a request
   const submitPayment = (requestId: string, transactionId: string, paymentTime: string) => {
     setRequests((prevRequests) =>
@@ -338,6 +345,7 @@ export const BookProvider: React.FC<{ children: React.ReactNode }> = ({ children
         rejectPayment,
         getUserRequests,
         getBook,
+        getRequestById,
       }}
     >
       {children}
